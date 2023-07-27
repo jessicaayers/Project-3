@@ -33,8 +33,14 @@ fluidPage(
                br(),
                selectInput("type", label = "Variable Selection", c("Taxon Class", "Median Life Expectancy")),
                conditionalPanel(condition = "input.type == 'Median Life Expectancy'",
-                                selectInput("median", label = "Specified MLE", c("Overall", "Female", "Male")))
-             ),
+                                selectInput("typePlot", label = "Type of Plot", c("Density", "Histogram")),
+                                selectInput("median", label = "Specified MLE", c("Female", "Male", "Overall")),
+              checkboxGroupInput("vals", label = "Additions", c("Mean and Confidence Interval Bounds")))
+            ,
+             conditionalPanel(condition = "input.type == 'Median Life Expectancy' & input.median == 'Overall'",
+                              radioButtons("overlay", label = "Overlay", c("No Overlay","Female MLE", "Male MLE", "Both Female and Male MLE"))
+             )
+            ),
              mainPanel(plotOutput("sumPlot"),
                        dataTableOutput("sumTable"))
              
