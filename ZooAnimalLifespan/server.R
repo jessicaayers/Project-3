@@ -213,7 +213,7 @@ function(input, output, session) {
           Means <-  as.data.frame(Means)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name, Overall.MLE)
+          animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Overall.MLE)
         }
       }
       else if(input$median == "Female"){
@@ -222,7 +222,7 @@ function(input, output, session) {
          MeansFemale <-  as.data.frame(MeansFemale)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name, Female.MLE)
+          animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Female.MLE)
         }
       }
       else if(input$median == "Male"){
@@ -231,7 +231,7 @@ function(input, output, session) {
           MeansMale <-  as.data.frame(MeansMale)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name, Male.MLE)
+          animal %>% select(Species.Common.Name,Scientific.Name, TaxonClass, Male.MLE)
         }
       }
     }
@@ -251,8 +251,40 @@ function(input, output, session) {
   
   
   
-  output$dataOutput <- renderText({
-    "Data Page"
+  output$dataOutput <- renderDataTable({
+    if(input$choices == "All Data"){
+    animal 
+    }
+    else if (input$choices == "Species Categorical Data"){
+      animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass)
+    }
+    else if(input$choices == "Overall Median Life Expectancy"){
+      if(input$order == "Order by longest median lifespan"){
+        animal %>% select(Scientific.Name, Overall.Sample.Size, Overall.MLE, Overall.CI...lower, Overall.CI...upper) %>% arrange(desc(Overall.MLE))
+      }
+      else {
+        animal %>% select(Scientific.Name, Overall.Sample.Size, Overall.MLE, Overall.CI...lower, Overall.CI...upper) %>% arrange(Overall.MLE) 
+      }
+      }
+    else if(input$choices == "Female Median Life Expectancy"){
+      if(input$order == "Order by longest median lifespan"){
+      animal %>% select(Scientific.Name, Female.Sample.Size, Female.MLE, Female.CI...lower, Female.CI...upper) %>% arrange(desc(Female.MLE))
+      }
+      else{
+        animal %>% select(Scientific.Name, Female.Sample.Size, Female.MLE, Female.CI...lower, Female.CI...upper) %>% arrange(Female.MLE)
+      }
+    }
+    else if(input$choices == "Male Median Life Expectancy"){
+      if(input$order == "Order by longest median lifespan"){
+      animal %>% select(Scientific.Name, Male.Sample.Size, Male.MLE, Male.CI...lower, Male.CI...upper) %>% arrange(desc(Male.MLE))
+      }
+      else{
+        animal %>% select(Scientific.Name, Male.Sample.Size, Male.MLE, Male.CI...lower, Male.CI...upper) %>% arrange(Male.MLE)
+      }
+    }
   })
   
+  observeEvent(input$save, {
+    write_csv(animal, input$path)
+})
 }

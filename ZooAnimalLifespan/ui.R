@@ -32,6 +32,7 @@ fluidPage(
                br(),
                br(),
                selectInput("type", label = "Variable Selection", c("Taxon Class", "Median Life Expectancy")),
+            
                conditionalPanel(condition = "input.type == 'Median Life Expectancy'",
                                 selectInput("typePlot", label = "Type of Plot", c("Density", "Histogram")),
                                 selectInput("median", label = "Specified MLE", c("Female", "Male", "Overall")),
@@ -39,12 +40,10 @@ fluidPage(
             ,
              conditionalPanel(condition = "input.type == 'Median Life Expectancy' & input.median == 'Overall'",
                               radioButtons("overlay", label = "Overlay", c("No Overlay","Female MLE", "Male MLE", "Both Female and Male MLE"))
-             )
-            ),
+             )),
              mainPanel(plotOutput("sumPlot"),
-                       dataTableOutput("sumTable"))
-             
-    )
+                       dataTableOutput("sumTable")))
+          
     ,
     
     tabPanel("Modeling",
@@ -63,6 +62,29 @@ fluidPage(
     
     tabPanel("Data",
              fluid = TRUE,
-             mainPanel(textOutput("dataOutput")))
-  )
+             sidebarPanel(
+               selectInput("choices", "Variables", c("All Data", "Species Categorical Data", "Overall Median Life Expectancy", "Male Median Life Expectancy", "Female Median Life Expectancy")),
+               
+               conditionalPanel(condition = "input.choices == 'Overall Median Life Expectancy' | input.choices == 'Female Median Life Expectancy' | input.choices =='Male Median Life Expectancy'",  radioButtons("order", label = "Lifespans", c("Order by longest median lifespan", "Order by shortest median lifespan"))),
+               selectInput("download", "Do you want to save the data?", c( "No", "Yes")),
+               conditionalPanel("input.download == 'Yes'",
+                                textInput("path", "Please write the path to save this file:"),
+                                actionButton("save", "Save"),
+                                br(),
+                                br(),
+                                "An example path is: /Users/jessayers/Documents/ST 558/TOPIC 4/animal.csv",
+                                br(),
+                                br(),
+                                "Quotations should not be included and animal.csv or a preferred name for the csv file should be attached to the end."
+              
+             )),
+             mainPanel(dataTableOutput("dataOutput"))
 )
+)
+)
+
+
+#Multiple Linear Regression
+#fit <- lm(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animal)
+#Regression Tree
+#fit <- tree(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animal)
