@@ -51,10 +51,36 @@ fluidPage(
              tabsetPanel(
                tabPanel("Modeling Info",
                         fluid = TRUE,
-                        mainPanel(textOutput("infoOutput"))),
+                        "There will be three models fit to the animal data.", br(), br(), "The first model fit will be a multiple linear regression model. The response variable that we are interested in predicting is the Overall Median Life Expectancy of the animals. The quantitative predictors will be the Male Median Life Expectancy and the Female Median Life Expectancy. Taxon Class will be used as a qualitative predictor. The benefits of this model are that the parameters can be easily interpreted. The downfalls of this model are that the predictive power may be low and there may be a relationship between Female and Male Median Life Expectancies that is not accounted for. Mathematically this can be shown: ", br(), br(), withMathJax(helpText('$$Overall.MLE = \\beta_0 + \\beta_1*TaxonClass +\\beta_2*Female.MLE +\\beta_3* Male.MLE$$ ')), br(), br(), 
+                        "The second model that will be fit is a regression tree. Since the overall median life expectancy is a continuous variable, a regression tree will be fit instead of a classification tree. The benefits of a regression tree are that there is still a high level of predictability and interpretation. A tree-based method also provides an easily interpreted visual called a dendogram and any interaction between variables is already accounted for. The downfall of regression trees are that sometimes the data can be overfit, so pruning may be needed." ,br(), br(),
+                        "The third model fit is a random forest model. This model averages many trees created from bootstrapped values to provide the mode efficient fit. Random subset of predictors are used to fit the trees. This is an advantage because by randomly selecting predictors, those with dominating influences will not overpower other predictors. Another advantage of random forests is that they tend to have a higher level of predictability than regression trees and models. downfall of random forests is that the trees are very hard to interpret since they are now being averaged."
+                        
+                        ),
+               
+               
+               
+               
                tabPanel("Model Fitting", 
                         fluid = TRUE,
-                        mainPanel(textOutput("fitOutput"))),
+                        sidebarPanel(
+                          "Let's Build Our Models!",
+                          br(),
+                          br(),
+                          numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1),
+                          checkboxGroupInput("regvals", "Variables for Multiple Linear Regression", c("Taxon Class", "Female MLE", "Male MLE")
+                          ),
+                          checkboxGroupInput("treevals", "Variables for Regression Tree", c("Taxon Class", "Female MLE", "Male MLE")),
+                          selectInput("rfvals", "Number of Predictors to Use for Random Forests", c(1,2,3)),
+                          actionButton("allfit", "Fit!"
+                          )
+                        ),
+                        mainPanel(tableOutput("fitOutput"))),
+               
+               
+               
+               
+               
+               
                tabPanel("Prediction", 
                         fluid = TRUE,
                         mainPanel(textOutput("predOutput")))

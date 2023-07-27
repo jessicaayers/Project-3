@@ -1,6 +1,9 @@
 library(shiny)
 library(tidyverse)
 library(DT)
+library(tree)
+library(randomForest)
+library(caret)
 
 animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
@@ -209,7 +212,7 @@ function(input, output, session) {
     else if(input$type == "Median Life Expectancy"){
       if(input$median == "Overall"){
         if(!is.null(input$vals)){
-          Means<- animal %>% select(Overall.MLE, Overall.CI...lower,, Overall.CI...upper) %>% colMeans(na.rm = TRUE)
+          Means<- animal %>% select(Overall.MLE, Overall.CI...lower, Overall.CI...upper) %>% colMeans(na.rm = TRUE)
           Means <-  as.data.frame(Means)
         }
         else if(is.null(input$vals)){
@@ -218,7 +221,7 @@ function(input, output, session) {
       }
       else if(input$median == "Female"){
         if(!is.null(input$vals)){
-          MeansFemale <- animal %>% select(Female.MLE, Female.CI...lower,, Female.CI...upper) %>% colMeans(na.rm = TRUE)
+          MeansFemale <- animal %>% select(Female.MLE, Female.CI...lower, Female.CI...upper) %>% colMeans(na.rm = TRUE)
          MeansFemale <-  as.data.frame(MeansFemale)
         }
         else if(is.null(input$vals)){
@@ -227,7 +230,7 @@ function(input, output, session) {
       }
       else if(input$median == "Male"){
         if(!is.null(input$vals)){
-          MeansMale <- animal %>% select(Male.MLE, Male.CI...lower,, Male.CI...upper) %>% colMeans(na.rm = TRUE)
+          MeansMale <- animal %>% select(Male.MLE, Male.CI...lower, Male.CI...upper) %>% colMeans(na.rm = TRUE)
           MeansMale <-  as.data.frame(MeansMale)
         }
         else if(is.null(input$vals)){
@@ -287,4 +290,48 @@ function(input, output, session) {
   observeEvent(input$save, {
     write_csv(animal, input$path)
 })
-}
+  
+  reactive({
+    set.seed(90)
+    trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
+    animalTrain <- animal[trainIndex, ]
+    animalTest <- animal[-trainIndex, ]
+    if(input$regvals == "Taxon Class" & input$regvals == "Female MLE" & input$regvals == "Male MLE"){
+   mlrfit <- train(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animalTrain, method = "lm",
+          preProcess = c("center", "scale"),
+          trControl = trainControl(method = "cv", number = 5))
+   mlrpred <- predict(mlrfit, newdata = animalTest) 
+   pred <- predict(fit, newdata = animalTest) 
+   mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
+    }
+    else if(input$regvals == "Taxon Class" & input$regvals == "Female MLE" & input$regvals != "Male MLE"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass + Female.MLE, data = animalTrain, method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+      mlrpred <- predict(mlrfit, newdata = animalTest) 
+      pred <- predict(fit, newdata = animalTest) 
+      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
+    }
+    else if(input$regvals == "Taxon Class" & input$regvals != "Female MLE" & input$vals == "Male MLE"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass + Male.MLE, data = animalTrain, method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+      mlrpred <- predict(mlrfit, newdata = animalTest) 
+      pred <- predict(fit, newdata = animalTest) 
+      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
+    }
+    else if(input$regvals != "Taxon Class" & input$vals == "Female MLE" & input$regvals == "Male MLE"){
+      mlrfit <- train(Overall.MLE ~ Female.MLE + Male.MLE, data = animalTrain, method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+      mlrpred <- predict(mlrfit, newdata = animalTest) 
+      pred <- predict(fit, newdata = animalTest) 
+      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
+    }
+  })
+    
+    
+  }
+
+  
+  
