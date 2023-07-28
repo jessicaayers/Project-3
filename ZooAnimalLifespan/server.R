@@ -7,7 +7,10 @@ library(caret)
 
 animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
-animal[,15] <- as.numeric(animal[,15])
+animal[,15] <- as.numeric(animal[,15], na.rm = TRUE)
+animal$Overall.MLE <- as.factor(animal$Overall.MLE)
+
+set.seed(555)
 
 function(input, output, session) {
   #About Page
@@ -242,12 +245,6 @@ function(input, output, session) {
   
   
   #Modeling Tab
-  output$infoOutput <- renderText({
-    "Model Info"
-  })
-  output$fitOutput <- renderText({
-    "Fit Info"
-  })
   output$predOutput <- renderText({
     "Pred Info"
   })
@@ -290,48 +287,28 @@ function(input, output, session) {
   observeEvent(input$save, {
     write_csv(animal, input$path)
 })
-  
-  reactive({
-    set.seed(90)
-    trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
-    animalTrain <- animal[trainIndex, ]
-    animalTest <- animal[-trainIndex, ]
-    if(input$regvals == "Taxon Class" & input$regvals == "Female MLE" & input$regvals == "Male MLE"){
-   mlrfit <- train(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animalTrain, method = "lm",
-          preProcess = c("center", "scale"),
-          trControl = trainControl(method = "cv", number = 5))
-   mlrpred <- predict(mlrfit, newdata = animalTest) 
-   pred <- predict(fit, newdata = animalTest) 
-   mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
-    }
-    else if(input$regvals == "Taxon Class" & input$regvals == "Female MLE" & input$regvals != "Male MLE"){
-      mlrfit <- train(Overall.MLE ~ TaxonClass + Female.MLE, data = animalTrain, method = "lm",
-                      preProcess = c("center", "scale"),
-                      trControl = trainControl(method = "cv", number = 5))
-      mlrpred <- predict(mlrfit, newdata = animalTest) 
-      pred <- predict(fit, newdata = animalTest) 
-      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
-    }
-    else if(input$regvals == "Taxon Class" & input$regvals != "Female MLE" & input$vals == "Male MLE"){
-      mlrfit <- train(Overall.MLE ~ TaxonClass + Male.MLE, data = animalTrain, method = "lm",
-                      preProcess = c("center", "scale"),
-                      trControl = trainControl(method = "cv", number = 5))
-      mlrpred <- predict(mlrfit, newdata = animalTest) 
-      pred <- predict(fit, newdata = animalTest) 
-      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
-    }
-    else if(input$regvals != "Taxon Class" & input$vals == "Female MLE" & input$regvals == "Male MLE"){
-      mlrfit <- train(Overall.MLE ~ Female.MLE + Male.MLE, data = animalTrain, method = "lm",
-                      preProcess = c("center", "scale"),
-                      trControl = trainControl(method = "cv", number = 5))
-      mlrpred <- predict(mlrfit, newdata = animalTest) 
-      pred <- predict(fit, newdata = animalTest) 
-      mlrstats <- postResample(pred, obs = animalTest$Overall.MLE)
-    }
-  })
-    
-    
-  }
 
+
+  trainIndex <- eventReactive(input$train, trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE))
+
+      datasplit <- reactiveValues(animalTrain = animal[trainIndex(), ], animalTest = animal[-trainIndex(), ])
+    
   
+  mlrvarfit <- reactive({
+    if(input$varvals == "Taxon Class"){
+      mlrfit <- caret::train(Overall.MLE ~ TaxonClass,
+                      data = as.data.frame(datasplit[[2]]),
+                      na.remove = TRUE,
+                      method = "lm",
+                      preProcess = c("method", "scale"),
+                      trControl = trainControl(method = "cv",number = 5))
+    }
+    summary(mlrfit)
+  })
+  
+  output$fitOutput <- renderUI({
+    mlrvarfit()
+  })
+}
+
   

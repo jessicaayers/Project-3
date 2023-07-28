@@ -36,7 +36,7 @@ fluidPage(
                conditionalPanel(condition = "input.type == 'Median Life Expectancy'",
                                 selectInput("typePlot", label = "Type of Plot", c("Density", "Histogram")),
                                 selectInput("median", label = "Specified MLE", c("Female", "Male", "Overall")),
-              checkboxGroupInput("vals", label = "Additions", c("Mean and Confidence Interval Bounds")))
+              checkboxGroupInput("vals", label = "Additions for Specified MLE", c("Mean and Confidence Interval Bounds")))
             ,
              conditionalPanel(condition = "input.type == 'Median Life Expectancy' & input.median == 'Overall'",
                               radioButtons("overlay", label = "Overlay", c("No Overlay","Female MLE", "Male MLE", "Both Female and Male MLE"))
@@ -67,14 +67,13 @@ fluidPage(
                           br(),
                           br(),
                           numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1),
-                          checkboxGroupInput("regvals", "Variables for Multiple Linear Regression", c("Taxon Class", "Female MLE", "Male MLE")
+                          radioButtons("varvals", "Variables for Multiple Linear Regression and Regression Tree", c("Taxon Class", "Female MLE", "Male MLE", "Both MLE Variables", "Taxon Class and Female MLE", "Taxon Class and Male MLE", "All three variables!")
                           ),
-                          checkboxGroupInput("treevals", "Variables for Regression Tree", c("Taxon Class", "Female MLE", "Male MLE")),
-                          selectInput("rfvals", "Number of Predictors to Use for Random Forests", c(1,2,3)),
                           actionButton("allfit", "Fit!"
                           )
                         ),
-                        mainPanel(tableOutput("fitOutput"))),
+                        mainPanel(uiOutput("fitOutput"),
+                                  dataTableOutput("fitStats"))),
                
                
                
