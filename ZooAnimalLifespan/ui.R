@@ -66,8 +66,12 @@ fluidPage(
                           "Let's Build Our Models!",
                           br(),
                           br(),
-                          numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1)
-                        ),
+                          numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1),
+                          selectInput("vars", "Choose your combinations of variables for the multiple linear regression and the Regression tree here: ", c("Taxon Class", "Female MLE", "Male MLE", "Female MLE & Male MLE", "Taxon Class & Female MLE", "Taxon Class & Male MLE", "Taxon Class & Female MLE & Male MLE")
+                          ),
+                          h3("Model Statistics!"),
+                          dataTableOutput("stats"))
+                        ,
                         mainPanel("The training data set is as follows: ",
                                   br(),
                                   br(),
@@ -76,9 +80,12 @@ fluidPage(
                                   br(),
                                   br(),
                                   dataTableOutput("testData"),
-                                  uiOutput("fitOutput"),
+                                  br(),
+                                  br(),
+                                  "The Multiple Linear Regression Summary is: ",
+                                  verbatimTextOutput("mlrfitOutput"),
                                   dataTableOutput("fitStats"))),
-               
+             
                
                
                

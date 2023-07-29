@@ -8,7 +8,7 @@ library(caret)
 animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
 animal[,15] <- as.numeric(animal[,15], na.rm = TRUE)
-animal <- subset(animal, complete.cases(animal$Overall.MLE))
+animal <- subset(animal, complete.cases(animal$Overall.MLE, Female.MLE, Male.MLE))
 
 set.seed(555)
 
@@ -307,6 +307,75 @@ animalTest <- reactive({
   
   output$testData <- renderDataTable({
    animalTest()
+  })
+  
+  mlrfit <- reactive({
+    if(input$vars == "Taxon Class"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass,
+                       data = animalTrain(),
+                       method = "lm",
+                       preProcess = c("center", "scale"),
+                       trControl = trainControl(method = "cv", number = 5))
+    }
+    else if(input$vars == "Female MLE"){
+      mlrfit <- train(Overall.MLE ~ Female.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+    else if(input$vars == "Male MLE"){
+      mlrfit <- train(Overall.MLE ~ Male.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+    else if (input$vars == "Female MLE & Male MLE"){
+      mlrfit <- train(Overall.MLE ~ Female.MLE + Male.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+    else if(input$vars == "Taxon Class & Female MLE"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass + Female.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+    else if(input$vars == "Taxon Class & Male MLE"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass + Male.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+    else if(input$vars == "Taxon Class & Female MLE & Male MLE"){
+      mlrfit <- train(Overall.MLE ~ TaxonClass + Male.MLE + Female.MLE,
+                      data = animalTrain(),
+                      method = "lm",
+                      preProcess = c("center", "scale"),
+                      trControl = trainControl(method = "cv", number = 5))
+    }
+  })
+  
+  mlrpred <- reactive({
+    pred <- predict(mlrfit(), newdata = animalTest())
+  })
+  
+  mlrstats <- reactive({
+    mlrstats <- as.data.frame(postResample(mlrpred(), obs = animalTest()$Overall.MLE))
+    colnames(mlrstats) <- "Multiple Lin Reg"
+    mlrstats
+  })
+  
+  output$mlrfitOutput <- renderPrint({
+    summary(mlrfit())
+})
+  output$stats <- renderDataTable({
+    mlrstats()
   })
 
 }
