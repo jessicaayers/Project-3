@@ -24,7 +24,7 @@ function(input, output, session) {
   })
   
   output$pictureOutput <- renderImage({
-    list(src = "/Users/jessayers/Documents/ST 558/TOPIC 4/zooanimal.jpeg",
+    list(src = "../zooanimal.jpeg",
          width = "1000", height = "400")
   })
   
