@@ -5,7 +5,7 @@ library(tree)
 library(randomForest)
 library(caret)
 
-animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv")
+animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv", fileEncoding="latin1")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
 animal[,15] <- as.numeric(animal[,15], na.rm = TRUE)
 animal <- subset(animal, complete.cases(animal$Overall.MLE, Female.MLE, Male.MLE))
@@ -219,7 +219,8 @@ function(input, output, session) {
           Means <-  as.data.frame(Means)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Overall.MLE)
+          Overall <- animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Overall.MLE)
+          Overall <- as.data.frame(Overall)
         }
       }
       else if(input$median == "Female"){
@@ -228,7 +229,8 @@ function(input, output, session) {
          MeansFemale <-  as.data.frame(MeansFemale)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Female.MLE)
+         Overall <-  animal %>% select(Species.Common.Name, Scientific.Name, TaxonClass, Female.MLE)
+         Overall <- as.data.frame(Overall)
         }
       }
       else if(input$median == "Male"){
@@ -237,7 +239,8 @@ function(input, output, session) {
           MeansMale <-  as.data.frame(MeansMale)
         }
         else if(is.null(input$vals)){
-          animal %>% select(Species.Common.Name,Scientific.Name, TaxonClass, Male.MLE)
+         Overall <- animal %>% select(Species.Common.Name,Scientific.Name, TaxonClass, Male.MLE)
+         Overall <-as.data.frame(Overall)
         }
       }
     }
