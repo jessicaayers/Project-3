@@ -16,7 +16,7 @@ function(input, output, session) {
   #About Page
   
   output$link <- renderUI({
-    tagList("More information on the data can be found here: ", a("Zoo Animal Lifespans", href = "https://data.world/animals/zoo-animal-lifespans"))
+    tagList("More information on the data can be found here (a data world account may need to be created): ", a("Zoo Animal Lifespans", href = "https://data.world/animals/zoo-animal-lifespans"))
   })
   
   output$link2 <- renderUI({
