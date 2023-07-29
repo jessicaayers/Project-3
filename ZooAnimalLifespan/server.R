@@ -8,7 +8,7 @@ library(caret)
 animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv", fileEncoding="latin1")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
 animal[,15] <- as.numeric(animal[,15], na.rm = TRUE)
-animal <- subset(animal, complete.cases(animal$Overall.MLE, Female.MLE, Male.MLE))
+animal <- subset(animal, complete.cases(animal$Overall.MLE, Female.MLE, Male.MLE)) 
 
 set.seed(555)
 
