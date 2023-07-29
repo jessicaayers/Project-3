@@ -106,7 +106,16 @@ fluidPage(
                
                tabPanel("Prediction", 
                         fluid = TRUE,
-                        mainPanel(textOutput("predOutput")))
+                        sidebarPanel(
+                          selectInput("model", "Choose a model to use for prediction: ", c("Multiple Linear Regression", "Regression Tree", "Random Forest Model")),
+                          selectInput("tc", "Choose a value for Taxon Class: ", c("Amphibia", "Aves", "Chondrichthyes", "Mammalia", "Reptilia")),
+                          numericInput("FMLE", "Choose a value for Female MLE", value = 2.4, step = 0.1, min = 2.4, max = 43.3),
+                          numericInput("MMLE", "Choose a value for Male MLE", value = 2.6, step = 0.1, min = 2.6, max = 51.3),
+                          "Make sure to run the models in the previous tab first!",
+                          br(),
+                          actionButton("pred", "Predict!")
+                        ),
+                        mainPanel(dataTableOutput("predOutput")))
              )),
     
     tabPanel("Data",
@@ -132,8 +141,3 @@ fluidPage(
 )
 )
 
-
-#Multiple Linear Regression
-#fit <- lm(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animal)
-#Regression Tree
-#fit <- tree(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE, data = animal)

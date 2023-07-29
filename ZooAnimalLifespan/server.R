@@ -478,6 +478,44 @@ animalTest <- eventReactive(input$fit, {
     rfstats()
   })
 
+  new <- reactive({
+    new <- data.frame(TaxonClass = input$tc, Female.MLE = input$FMLE, Male.MLE = input$MMLE)
+  })
+  
+predictions <- eventReactive(input$pred, {
+    if(input$model == "Multiple Linear Regression"){
+    mlrfitp <- train(Overall.MLE ~ TaxonClass + Male.MLE + Female.MLE,
+                    data = animalTrain(),
+                    method = "lm",
+                    preProcess = c("center", "scale"),
+                    trControl = trainControl(method = "cv", number = 5))
+    p <- as.data.frame(predict(mlrfitp, newdata = new()))
+    colnames(p) <- "Prediction"
+    p
+    }
+    else if(input$model == "Regression Tree"){
+      treefitp <- train(Overall.MLE ~ TaxonClass + Male.MLE + Female.MLE,
+                       data = animalTrain(),
+                       method = "rpart",
+                       trControl = trainControl(method = "cv", number = 5))
+     p <- as.data.frame( predict(treefitp, newdata = new()))
+     colnames(p) <- "Prediction"
+     p
+    }
+    else if(input$model == "Random Forest"){
+      rfitp <- train(Overall.MLE ~ TaxonClass + Male.MLE + Female.MLE,
+                    data = animalTrain(),
+                    method = "rf",
+                    trControl = trainControl(method = "cv", number = 5))
+      p <- as.data.frame(predict(rfitp, newdata = new()))
+      colnames(p) <- "Prediction"
+      p
+    }
+  })
+    
+    output$predOutput <- renderDataTable({
+      predictions()
+    })
 }
 
   
