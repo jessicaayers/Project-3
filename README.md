@@ -15,19 +15,6 @@ The packages needed to run this app are:
 
 Install the packages with: `install.packages(c("shiny", "tidyverse", "DT", "tree", "randomForest", "caret")`
 
-Call the packages with:
-
-library(shiny)
-
-library(tidyverse)
-
-library(DT)
-
-library(tree)
-
-library(randomForest)
-
-library(caret)
 
 Run the app with: `shiny::runGitHub("Project-3", "jessicaayers", ref = "master", subdir = "/ZooAnimalLifespan")`
 
