@@ -13,7 +13,7 @@ The packages needed to run this app are:
   - randomForest
   - caret
 
-Install the packages with: `install.packages(c("shiny", "tidyverse", "DT", "tree", "randomForest", "caret")`
+Install the packages with: `install.packages(c("shiny", "tidyverse", "DT", "tree", "randomForest", "caret"))`
 
 
 Run the app with: `shiny::runGitHub("Project-3", "jessicaayers", ref = "master", subdir = "/ZooAnimalLifespan")`
