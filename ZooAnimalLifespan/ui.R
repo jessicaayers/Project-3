@@ -66,13 +66,17 @@ fluidPage(
                           "Let's Build Our Models!",
                           br(),
                           br(),
-                          numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1),
-                          radioButtons("varvals", "Variables for Multiple Linear Regression and Regression Tree", c("Taxon Class", "Female MLE", "Male MLE", "Both MLE Variables", "Taxon Class and Female MLE", "Taxon Class and Male MLE", "All three variables!")
-                          ),
-                          actionButton("allfit", "Fit!"
-                          )
+                          numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1)
                         ),
-                        mainPanel(uiOutput("fitOutput"),
+                        mainPanel("The training data set is as follows: ",
+                                  br(),
+                                  br(),
+                                  dataTableOutput("trainData"),
+                                  "The test data set is as follows: ",
+                                  br(),
+                                  br(),
+                                  dataTableOutput("testData"),
+                                  uiOutput("fitOutput"),
                                   dataTableOutput("fitStats"))),
                
                

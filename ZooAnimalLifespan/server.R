@@ -8,7 +8,7 @@ library(caret)
 animal <- read.csv("/Users/jessayers/Documents/ST 558/TOPIC 4/AZA_MLE_Jul2018.csv")
 animal <- animal %>% select(-c(Male.Data.Deficient, Female.Data.Deficient)) 
 animal[,15] <- as.numeric(animal[,15], na.rm = TRUE)
-animal$Overall.MLE <- as.factor(animal$Overall.MLE)
+animal <- subset(animal, complete.cases(animal$Overall.MLE))
 
 set.seed(555)
 
@@ -287,28 +287,28 @@ function(input, output, session) {
   observeEvent(input$save, {
     write_csv(animal, input$path)
 })
-
-
-  trainIndex <- eventReactive(input$train, trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE))
-
-      datasplit <- reactiveValues(animalTrain = animal[trainIndex(), ], animalTest = animal[-trainIndex(), ])
-    
   
-  mlrvarfit <- reactive({
-    if(input$varvals == "Taxon Class"){
-      mlrfit <- caret::train(Overall.MLE ~ TaxonClass,
-                      data = as.data.frame(datasplit[[2]]),
-                      na.remove = TRUE,
-                      method = "lm",
-                      preProcess = c("method", "scale"),
-                      trControl = trainControl(method = "cv",number = 5))
-    }
-    summary(mlrfit)
+
+animalTrain <- reactive({
+    trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
+    animalTrain <- animal[trainIndex, ]
+    animalTrain
+})
+
+animalTest <- reactive({
+  trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
+  animalTest <- animal[-trainIndex, ]
+  animalTest
+})
+  
+ output$trainData <- renderDataTable({
+    animalTrain()
   })
   
-  output$fitOutput <- renderUI({
-    mlrvarfit()
+  output$testData <- renderDataTable({
+   animalTest()
   })
+
 }
 
   
