@@ -67,10 +67,15 @@ fluidPage(
                           br(),
                           br(),
                           numericInput("train", "Proportion of Data to Use in Training Set", value = 0.5, step = 0.1, min = 0, max = 1),
-                          selectInput("vars", "Choose your combinations of variables for the multiple linear regression and the Regression tree here: ", c("Taxon Class", "Female MLE", "Male MLE", "Female MLE & Male MLE", "Taxon Class & Female MLE", "Taxon Class & Male MLE", "Taxon Class & Female MLE & Male MLE")
+                          selectInput("vars", "Choose your combinations of variables for the multiple linear regression: ", c("Taxon Class", "Female MLE", "Male MLE", "Female MLE & Male MLE", "Taxon Class & Female MLE", "Taxon Class & Male MLE", "Taxon Class & Female MLE & Male MLE")
                           ),
+                          selectInput("treevars", "Choose your combinations of variables for the regression tree: ", c("Taxon Class", "Female MLE", "Male MLE", "Female MLE & Male MLE", "Taxon Class & Female MLE", "Taxon Class & Male MLE", "Taxon Class & Female MLE & Male MLE")),
+                          numericInput("m", "Choose the m value for the random forest model: ", value = 1, step = 1, min = 1, max = 3),
+                          actionButton("fit", "Let's fit our models!"),
                           h3("Model Statistics!"),
-                          dataTableOutput("stats"))
+                          dataTableOutput("mstats"),
+                          dataTableOutput("tstats"),
+                          dataTableOutput("rfstats"))
                         ,
                         mainPanel("The training data set is as follows: ",
                                   br(),
@@ -84,7 +89,15 @@ fluidPage(
                                   br(),
                                   "The Multiple Linear Regression Summary is: ",
                                   verbatimTextOutput("mlrfitOutput"),
-                                  dataTableOutput("fitStats"))),
+                                  br(),
+                                  br(),
+                                  "The Regression Tree Output is: ",
+                                  verbatimTextOutput("treeOutput"),
+                                  br(),
+                                  br(),
+                                  "The Random Forest Output is: ",
+                                  verbatimTextOutput("rfOutput"))
+                      ),
              
                
                

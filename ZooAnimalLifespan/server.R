@@ -289,27 +289,28 @@ function(input, output, session) {
 })
   
 
-animalTrain <- reactive({
+animalTrain <- eventReactive(input$fit, {
     trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
     animalTrain <- animal[trainIndex, ]
     animalTrain
 })
 
-animalTest <- reactive({
+
+animalTest <- eventReactive(input$fit, {
   trainIndex <- createDataPartition(animal$Overall.MLE, p = input$train, list = FALSE)
   animalTest <- animal[-trainIndex, ]
   animalTest
 })
-  
+
  output$trainData <- renderDataTable({
     animalTrain()
   })
-  
+ 
   output$testData <- renderDataTable({
    animalTest()
   })
   
-  mlrfit <- reactive({
+  mlrfit <- eventReactive(input$fit, {
     if(input$vars == "Taxon Class"){
       mlrfit <- train(Overall.MLE ~ TaxonClass,
                        data = animalTrain(),
@@ -361,21 +362,120 @@ animalTest <- reactive({
     }
   })
   
-  mlrpred <- reactive({
+  output$mlrfitOutput <- renderPrint({
+    summary(mlrfit())
+  })
+  
+  treefit <- eventReactive(input$fit, {
+    if(input$treevars == "Taxon Class"){
+      treefit <- train(Overall.MLE ~ TaxonClass, 
+                       data = animalTrain(),
+                       method = "rpart",
+                       trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if(input$treevars == "Female MLE"){
+      treefit <- train(Overall.MLE ~ Female.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if(input$treevars == "Male MLE"){
+      treefit <- train(Overall.MLE ~ Male.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if (input$treevars == "Female MLE & Male MLE"){
+      treefit <- train(Overall.MLE ~ Female.MLE + Male.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if(input$treevars == "Taxon Class & Female MLE"){
+      treefit <- train(Overall.MLE ~ TaxonClass + Female.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if(input$treevars == "Taxon Class & Male MLE"){
+      treefit <- train(Overall.MLE ~ TaxonClass + Male.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+    else if(input$treevars == "Taxon Class & Female MLE & Male MLE"){
+      treefit <- train(Overall.MLE ~ TaxonClass + Male.MLE + Female.MLE,
+                      data = animalTrain(),
+                      method = "rpart",
+                      trControl = trainControl(method = "cv", number = 5))
+      treefit
+    }
+  })
+  
+  output$treeOutput <- renderPrint({
+    treefit()
+  })
+  
+  rfit <- eventReactive(input$fit, {
+    rfit <- train(Overall.MLE ~ TaxonClass + Female.MLE + Male.MLE ,
+                     data = animalTrain(),
+                     method = "rf",
+                     trControl = trainControl(method = "cv", number = 5),
+                    tuneGrid = data.frame(mtry = 1:input$m))
+    rfit
+  })
+  
+  output$rfOutput <- renderPrint({
+    rfit()
+  })
+  
+  
+  mlrpred <- eventReactive(input$fit, {
     pred <- predict(mlrfit(), newdata = animalTest())
   })
   
-  mlrstats <- reactive({
+  mlrstats <- eventReactive(input$fit, {
     mlrstats <- as.data.frame(postResample(mlrpred(), obs = animalTest()$Overall.MLE))
     colnames(mlrstats) <- "Multiple Lin Reg"
     mlrstats
   })
   
-  output$mlrfitOutput <- renderPrint({
-    summary(mlrfit())
-})
-  output$stats <- renderDataTable({
-    mlrstats()
+  treepred <- eventReactive(input$fit, {
+    treepred <- predict(treefit(), newdata = animalTest())
+  })
+  
+  treestats <- eventReactive(input$fit, {
+    treestats <- as.data.frame(postResample(treepred(), obs = animalTest()$Overall.MLE))
+    colnames(treestats) <- "Regression Tree"
+    treestats
+  })
+  
+  rfpred <- eventReactive(input$fit, {
+    rfpred <- predict(rfit(), newdata = animalTest())
+  })
+  
+  rfstats <- eventReactive(input$fit, {
+    rfstats <- as.data.frame(postResample(rfpred(), obs = animalTest()$Overall.MLE))
+    colnames(rfstats) <- "Random Forest"
+    rfstats
+  })
+  
+  output$mstats <- renderDataTable({
+   mlrstats()
+  })
+  
+  output$tstats <- renderDataTable({
+    treestats()
+  })
+
+  output$rfstats <- renderDataTable({
+    rfstats()
   })
 
 }
