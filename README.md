@@ -29,4 +29,6 @@ library(randomForest)
 
 library(caret)
 
-Run the app with: `shiny::runGitHub("Project-3", "jessicaayers", ref = "master")`
+Run the app with: `shiny::runGitHub("Project-3", "jessicaayers", ref = "master", subdir = "/ZooAnimalLifespan")`
+
+
